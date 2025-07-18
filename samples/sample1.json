@@ -1,0 +1,67 @@
+{
+  "courseTitle": "RETA FINAL POLÍCIA FEDERAL",
+  "notebookTitle": "CADERNO 1",
+  "sections": [
+    {
+      "subjectPrimary": "Reconhecimento de Gêneros Textuais",
+      "subjectSecondary": "Interpretação",
+      "theorySlides": [
+        "Teoria",
+        "Identificando Gêneros",
+        "Estratégias de Leitura"
+      ],
+      "exerciseIntros": [
+        "Questões de Exercícios"
+      ],
+      "exercises": [
+        {
+          "id": 1,
+          "statement": "1) (CESPE/2024) O texto 10A2‑I é predominantemente...",
+          "options": [
+            "A) Narrativo",
+            "B) Expositivo",
+            "C) Descritivo",
+            "D) Dissertativo",
+            "E) Injuntivo"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 2,
+          "statement": "2) Julgue o item a seguir",
+          "options": [
+            "CERTO",
+            "ERRADO"
+          ],
+          "answer": "CERTO"
+        }
+      ]
+    },
+    {
+      "subjectPrimary": "DIREITO ADMINISTRATIVO",
+      "subjectSecondary": null,
+      "theorySlides": [
+        "Teoria",
+        "Atos Administrativos"
+      ],
+      "exerciseIntros": [
+        "Questões de Exercícios"
+      ],
+      "exercises": [
+        {
+          "id": 1,
+          "statement": "1) (CESPE/2023) Atos administrativos são...",
+          "options": [
+            "A) Fatos",
+            "B) Contratos",
+            "C) Atos da administração",
+            "D) Atos de direito privado",
+            "E) Atos de império"
+          ],
+          "answer": "C"
+        }
+      ]
+    }
+  ],
+  "warnings": []
+}
