@@ -41,12 +41,19 @@ def _parse_exercises(paragraphs: list[str], warnings: list[str]) -> list[dict]:
             continue
 
         if current_exercise:
+            # If the line is an option, add it.
             if is_option(p_text):
                 current_exercise["options"].append(p_text)
+            # If the line is an answer, add it.
             elif is_answer(p_text):
                 answer = re.sub(r'gabarito|resposta|alternativa correta|correto', '', p_text, flags=re.IGNORECASE).strip()
                 answer = answer.replace(":", "").strip()
                 current_exercise["answer"] = answer
+            # Otherwise, append to the statement, assuming it's a continuation.
+            elif current_exercise.get("options"):
+                 # Once we start seeing options, we should not append to statement.
+                 # This could be a new unnumbered exercise, so we just ignore it for now.
+                 pass
             else:
                 current_exercise["statement"] += f"\n{p_text}"
 

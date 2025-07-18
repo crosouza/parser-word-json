@@ -10,6 +10,8 @@ def is_subject_primary(p: Paragraph) -> bool:
     Heuristic: Heading 3 style, or all caps and length < 60.
     """
     text = p.text.strip()
+    if text in ["CERTO", "ERRADO"]:
+        return False
     if p.style.name == 'Heading 3':
         return True
     if p.style.name == 'Normal' and text.isupper() and len(text) < 60:
