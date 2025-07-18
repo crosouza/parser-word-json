@@ -1,4 +1,4 @@
-# Parser Word → JSON – Guia para a IA (Gemini 2.5 CLI)
+# Parser Word → JSON 
 
 **Objetivo**  
 Converter automaticamente um arquivo **`.docx`** (material didático de cursos) em um **JSON canônico**.  
