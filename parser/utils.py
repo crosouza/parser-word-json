@@ -39,6 +39,13 @@ def is_answer(p: str) -> bool:
 def is_option(p: str) -> bool:
     """
     Checks if a paragraph is an exercise option.
-    Accepts 'A)', 'A.', '(A)', '[A]'.
+    Accepts markers like 'A)', 'A.', '(A)', '[A]', and bullet points.
     """
-    return bool(re.match(r'^[A-Ea-e][\)\.\]]|^•', p)) or p in ["CERTO", "ERRADO"]
+    # Regex explained:
+    # ^\s*         - Start of string with optional whitespace
+    # [\(\[]?      - Optional opening parenthesis or bracket
+    # [A-Ea-e]     - An uppercase or lowercase letter from A to E
+    # [\.\)\]]     - A literal dot, closing parenthesis, or closing bracket
+    # |^•          - OR a bullet point at the start of the string
+    p_stripped = p.strip()
+    return bool(re.match(r'^\s*[\(\[]?[A-Ea-e][\.\)\]]|^•', p_stripped)) or p_stripped in ["CERTO", "ERRADO"]
