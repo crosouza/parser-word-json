@@ -5,22 +5,13 @@ import re
 from docx import Document
 from docx.text.paragraph import Paragraph
 from parser.schema import ParsedDocument, Section, Exercise
-
-def _is_subject_primary(p: Paragraph) -> bool:
-    """Checks if a paragraph is a primary subject."""
-    return p.style.name == 'Heading 3'
-
-def _is_theory_slide(p: Paragraph) -> bool:
-    """Checks if a paragraph is a theory slide."""
-    return p.style.name == 'Heading 4'
-
-def _is_exercise_intro(p: str) -> bool:
-    """Checks if a paragraph is an exercise intro."""
-    return bool(re.search(r'questões de exercícios', p, re.IGNORECASE))
-
-def _is_answer(p: str) -> bool:
-    """Checks if a paragraph is an answer."""
-    return bool(re.search(r'gabarito|resposta', p, re.IGNORECASE))
+from parser.utils import (
+    is_subject_primary,
+    is_theory_slide,
+    is_exercise_intro,
+    is_answer,
+    is_option,
+)
 
 def _parse_exercises(paragraphs: list[str], warnings: list[str]) -> list[dict]:
     exercises = []
@@ -34,6 +25,8 @@ def _parse_exercises(paragraphs: list[str], warnings: list[str]) -> list[dict]:
         # Heuristic: Exercise starts with a number followed by a parenthesis or a dot.
         if re.match(r'^\d+[\.\)]', p_text):
             if current_exercise:
+                if not current_exercise.get("options"):
+                    warnings.append(f"Exercise {current_exercise['id']} is missing options.")
                 if not current_exercise.get("answer"):
                     warnings.append(f"Exercise {current_exercise['id']} is missing an answer.")
                 exercises.append(current_exercise)
@@ -48,21 +41,18 @@ def _parse_exercises(paragraphs: list[str], warnings: list[str]) -> list[dict]:
             continue
 
         if current_exercise:
-            # Heuristic: Options start with A-E) or a bullet point.
-            if re.match(r'^[A-Ea-e]\)', p_text) or re.match(r'^•', p_text) or p_text in ["CERTO", "ERRADO"]:
+            if is_option(p_text):
                 current_exercise["options"].append(p_text)
-            # Heuristic: Answer contains "Gabarito" or "Resposta".
-            elif _is_answer(p_text):
-                # Extract the answer from the line.
-                answer = re.sub(r'gabarito|resposta', '', p_text, flags=re.IGNORECASE).strip()
-                # remove : from answer
+            elif is_answer(p_text):
+                answer = re.sub(r'gabarito|resposta|alternativa correta|correto', '', p_text, flags=re.IGNORECASE).strip()
                 answer = answer.replace(":", "").strip()
                 current_exercise["answer"] = answer
-            # Otherwise, it's part of the statement.
             else:
                 current_exercise["statement"] += f"\n{p_text}"
 
     if current_exercise:
+        if not current_exercise.get("options"):
+            warnings.append(f"Exercise {current_exercise['id']} is missing options.")
         if not current_exercise.get("answer"):
             warnings.append(f"Exercise {current_exercise['id']} is missing an answer.")
         exercises.append(current_exercise)
@@ -76,7 +66,7 @@ def _parse_sections(paragraphs: list[Paragraph], warnings: list[str]) -> list[di
         return sections
 
     current_section = None
-    state = "SEARCHING_SECTION" # SEARCHING_SECTION, IN_SECTION, IN_THEORY, IN_EXERCISE_INTRO, IN_EXERCISES
+    state = "SEARCHING_SECTION"
     exercise_paragraphs = []
 
     for p in paragraphs:
@@ -84,7 +74,7 @@ def _parse_sections(paragraphs: list[Paragraph], warnings: list[str]) -> list[di
         if not p_text:
             continue
 
-        if _is_subject_primary(p):
+        if is_subject_primary(p):
             if current_section:
                 if exercise_paragraphs:
                     current_section["exercises"] = _parse_exercises(exercise_paragraphs, warnings)
@@ -101,21 +91,24 @@ def _parse_sections(paragraphs: list[Paragraph], warnings: list[str]) -> list[di
             state = "IN_SECTION"
             continue
 
+        if not current_section:
+            continue
+
         if state == "IN_SECTION":
-            if _is_theory_slide(p):
+            if is_theory_slide(p):
                 state = "IN_THEORY"
                 current_section["theorySlides"].append(p_text)
-            elif _is_exercise_intro(p_text):
+            elif is_exercise_intro(p_text):
                 state = "IN_EXERCISE_INTRO"
                 current_section["exerciseIntros"].append(p_text)
             elif not current_section.get("subjectSecondary"):
                 current_section["subjectSecondary"] = p_text
         
         elif state == "IN_THEORY":
-            if _is_exercise_intro(p_text):
+            if is_exercise_intro(p_text):
                 state = "IN_EXERCISE_INTRO"
                 current_section["exerciseIntros"].append(p_text)
-            elif _is_subject_primary(p):
+            elif is_subject_primary(p):
                 if current_section:
                     sections.append(current_section)
                 current_section = {
@@ -136,7 +129,6 @@ def _parse_sections(paragraphs: list[Paragraph], warnings: list[str]) -> list[di
         elif state == "IN_EXERCISES":
             exercise_paragraphs.append(p_text)
 
-
     if current_section:
         if exercise_paragraphs:
             current_section["exercises"] = _parse_exercises(exercise_paragraphs, warnings)
@@ -148,22 +140,16 @@ def _parse_sections(paragraphs: list[Paragraph], warnings: list[str]) -> list[di
 def parse_docx(path: str) -> dict:
     """
     Parses a .docx file and returns a dictionary conforming to the schema.
-
-    Args:
-        path: The path to the .docx file.
-
-    Returns:
-        A dictionary with the parsed data.
     """
     try:
         document = Document(path)
-        # Keep paragraph objects to access style information
-        paragraphs = [p for p in document.paragraphs] 
+        paragraphs = list(document.paragraphs)
     except Exception as e:
         return {"warnings": [f"Failed to read DOCX file: {e}"]}
 
     warnings = []
     
+    # Find course and notebook titles
     course_title = ""
     if paragraphs:
         p = paragraphs.pop(0)
@@ -180,11 +166,9 @@ def parse_docx(path: str) -> dict:
 
     sections = _parse_sections(paragraphs, warnings)
 
-    parsed_data = {
+    return {
         "courseTitle": course_title,
         "notebookTitle": notebook_title,
         "sections": sections,
         "warnings": warnings
     }
-
-    return parsed_data

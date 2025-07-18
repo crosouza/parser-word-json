@@ -17,11 +17,25 @@ def main():
         sys.stdout.reconfigure(encoding='utf-8')
 
     parser = argparse.ArgumentParser(description="Parse a .docx file to a canonical JSON format.")
-    parser.add_argument("-i", "--input", required=True, help="Path to the .docx file.")
+    parser.add_argument("-i", "--input", help="Path to the .docx file. Required if not in serve mode.")
     parser.add_argument("-o", "--output", help="Path to the output .json file. Defaults to stdout.")
     parser.add_argument("--json-indent", type=int, default=2, help="Indentation for the JSON output.")
+    parser.add_argument("--serve", action="store_true", help="Run as a web server.")
     
     args = parser.parse_args()
+
+    if args.serve:
+        try:
+            from parser.server import create_app
+            app = create_app()
+            app.run(host="0.0.0.0", port=5000)
+        except ImportError:
+            print("Error: Flask is not installed. Please install it with 'pip install Flask'", file=sys.stderr)
+            sys.exit(1)
+        return
+
+    if not args.input:
+        parser.error("--input is required when not in --serve mode.")
 
     try:
         parsed_data = parse_docx(args.input)
