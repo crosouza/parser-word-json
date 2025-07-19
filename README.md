@@ -1,6 +1,6 @@
 # Parser Word → JSON – Guia para a IA (Gemini 2.5 CLI)
 
-[![codecov](https://codecov.io/gh/crosouza/parser-word-json/graph/badge.svg?token=YOUR_CODECOV_TOKEN_HERE)](https://codecov.io/gh/crosouza/parser-word-json)
+[![codecov](https://codecov.io/gh/crosouza/parser-word-json/graph/badge.svg)](https://codecov.io/gh/crosouza/parser-word-json)
 
 **Objetivo**  
 Converter automaticamente um arquivo **`.docx`** (material didático de cursos) em um **JSON canônico**.  
