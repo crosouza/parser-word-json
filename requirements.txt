@@ -1,2 +1,5 @@
-python-docx
-pydantic
+python-docx==1.1.0
+pydantic==2.5.3
+pydantic-core==2.14.6
+Flask==3.0.*
+Flask-Limiter==3.*

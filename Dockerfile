@@ -1,17 +1,24 @@
-# Use the official Python image.
-FROM python:3.12-slim
+# Use a specific version of the Python slim image
+FROM python:3.12.4-slim
 
-# Set the working directory.
+# Set the working directory
 WORKDIR /app
 
-# Copy the requirements file.
-COPY requirements.txt .
+# Create a non-root user
+RUN useradd --create-home --uid 1000 appuser
+USER appuser
 
-# Install the dependencies.
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy only necessary files
+COPY --chown=appuser:appuser requirements.txt .
 
-# Copy the application code.
-COPY parser/ /app/parser/
+# Install dependencies
+RUN pip install --no-cache-dir --user -r requirements.txt
 
-# Set the entrypoint.
+# Copy the application code
+COPY --chown=appuser:appuser parser/ /app/parser/
+
+# Expose the server port
+EXPOSE 5000
+
+# Set the entrypoint
 ENTRYPOINT ["python", "-m", "parser.cli"]
