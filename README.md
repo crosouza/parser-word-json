@@ -1,5 +1,7 @@
 # Parser Word → JSON – Guia para a IA (Gemini 2.5 CLI)
 
+[![codecov](https://codecov.io/gh/crosouza/parser-word-json/graph/badge.svg?token=YOUR_CODECOV_TOKEN_HERE)](https://codecov.io/gh/crosouza/parser-word-json)
+
 **Objetivo**  
 Converter automaticamente um arquivo **`.docx`** (material didático de cursos) em um **JSON canônico**.  
 Esse JSON será usado mais adiante pelo serviço **Yumdocs** para gerar apresentações PowerPoint e por fluxos **n8n** para automação.
@@ -118,28 +120,24 @@ A IA deve produzir uma biblioteca/CLI em **Python 3.12+** que:
 | `--json-indent` | `2` | Recuo no `json.dumps` |
 | `--log-level` | `INFO` | TRACE, DEBUG, INFO, WARNING |
 | `YUM_PARSER_TMP` | `/tmp` | Pasta tmp para mídia |
+| `PORT` | `5000` | Porta para o modo `--serve` |
+| `LOG_LEVEL` | `INFO` | Nível de log (e.g., `DEBUG`, `INFO`, `WARNING`) |
 
 ---
 
-## 6. Lista de Tarefas para a IA
+## 7. Rate Limiting
 
-1. **Criar a estrutura de diretórios** mostrada em § 2.  
-2. **Implementar `extractor.py`**<br>  • Função `parse_docx(path) -> dict` aplicando regras de § 3.<br>  • Utilizar regex robustas para capturar múltiplas seções.<br>  • Preencher `warnings` quando blocos faltarem.  
-3. **Implementar `schema.py`** validando contra o esquema do § 4.  
-4. **Implementar `cli.py`** com argparse, saída stdout/disco, `--serve` opcional.  
-5. **Escrever testes (`tests/test_extractor.py`)** cobrindo:<br>  a. Documento com 1 seção.<br>  b. Documento com 3 seções e 20 questões.<br>  c. Documento faltando gabaritos (gera `warnings`).  
-6. **Criar 3 amostras `.docx`** em `samples/` e seus JSON esperados.  
-7. **Dockerizar** (imagem < 200 MB).  
-8. **Documentar** comandos de build e execução:<br>  
-   ```bash
-   docker build -t yum-parser .
-   docker run --rm -v $(pwd)/samples:/data yum-parser -i /data/sample.docx
-   ```  
-9. **Gerar artefato ZIP** do projeto.  
+O modo servidor (`--serve`) possui um limite de requisições de **60 por minuto** por endereço IP.
 
 ---
 
-## 7. Entrega Esperada
+## 8. Versionamento
+
+O projeto segue o [Versionamento Semântico](https://semver.org/). As versões são tagueadas no Git e as imagens Docker são construídas com a tag de versão correspondente.
+
+---
+
+## 9. Entrega Esperada
 
 - Repositório estruturado.  
 - Todos os testes `pytest` passando.  

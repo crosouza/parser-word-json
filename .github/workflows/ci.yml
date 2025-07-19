@@ -24,11 +24,22 @@ jobs:
     - name: Test with pytest
       run: |
         pytest tests/ --cov=parser --cov-report=xml
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
 
   build:
     needs: test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Extract version from pyproject.toml
+      id: version
+      run: echo "VERSION=$(grep -oP 'version = "\K[^"]+' pyproject.toml)" >> $GITHUB_ENV
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag parser-word-json:${{ github.sha }}
+      run: docker build . --file Dockerfile --tag parser-word-json:${{ env.VERSION }} --tag parser-word-json:latest

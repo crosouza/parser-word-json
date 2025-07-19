@@ -4,6 +4,8 @@ Command-Line Interface for the parser.
 import argparse
 import json
 import sys
+import os
+import logging
 from parser.extractor import parse_docx
 from parser.schema import ParsedDocument
 
@@ -12,6 +14,10 @@ def main():
     """
     Main function for the CLI.
     """
+    # Set up logging
+    log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+    logging.basicConfig(level=log_level, format="%(asctime)s - %(levelname)s - %(message)s")
+
     # Reconfigure stdout to use utf-8 encoding
     if sys.stdout.encoding != 'utf-8':
         sys.stdout.reconfigure(encoding='utf-8')
@@ -28,9 +34,11 @@ def main():
         try:
             from parser.server import create_app
             app = create_app()
-            app.run(host="0.0.0.0", port=5000)
+            port = int(os.getenv("PORT", 5000))
+            logging.info(f"Starting server on port {port}...")
+            app.run(host="0.0.0.0", port=port)
         except ImportError:
-            print("Error: Flask is not installed. Please install it with 'pip install Flask'", file=sys.stderr)
+            logging.error("Flask is not installed. Please install it with 'pip install Flask'")
             sys.exit(1)
         return
 
@@ -38,6 +46,7 @@ def main():
         parser.error("--input is required when not in --serve mode.")
 
     try:
+        logging.info(f"Parsing document: {args.input}")
         parsed_data = parse_docx(args.input)
         
         # Validate with Pydantic
@@ -48,12 +57,13 @@ def main():
         if args.output:
             with open(args.output, "w", encoding="utf-8") as f:
                 f.write(output_json)
-            print(f"Successfully parsed {args.input} to {args.output}")
+            logging.info(f"Successfully parsed {args.input} to {args.output}")
         else:
+            # For stdout, we keep the print to just output the JSON
             print(output_json)
 
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+        logging.error(f"An error occurred: {e}", exc_info=True)
         sys.exit(1)
 
 
