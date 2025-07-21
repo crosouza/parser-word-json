@@ -1,0 +1,46 @@
+{
+  "courseTitle": "Sample Course Name",
+  "notebookTitle": "Sample Notebook Name",
+  "programmaticContent": "This is the programmatic content.",
+  "subjects": [
+    {
+      "subjectName": "Subject 1",
+      "theorySlides": [
+        {
+          "title": "Title for Theory 1",
+          "content": "Content for Theory 1."
+        }
+      ],
+      "exercises": [
+        {
+          "statement": "Solve the following questions.",
+          "questions": [
+            {
+              "question": "a) What is 1+1?",
+              "answer": "2"
+            },
+            {
+              "question": "b) What is the capital of France?",
+              "answer": "Paris"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "contestQuestions": [
+    {
+      "id": 1,
+      "statement": "(CESPE/2024) This is a contest question.",
+      "text": "",
+      "source": "CESPE/2024",
+      "options": [
+        "A) Option A",
+        "B) Option B",
+        "C) Option C"
+      ],
+      "answer": "B"
+    }
+  ],
+  "warnings": []
+}
