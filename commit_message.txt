@@ -1,0 +1,1 @@
+docs: Update README with latest project structure and usage
